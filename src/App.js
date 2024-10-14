@@ -3,7 +3,7 @@ import StarRating from "./StarRating";
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const KEY = "1234cae2";
+const KEY = "cae4a4a2";
 export default function App() {
   const [movieQuery, setMovieQuery] = useState("");
   const [movies, setMovies] = useState([]);
@@ -47,7 +47,7 @@ export default function App() {
           setIsLoading(true);
           setError("");
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&t=${movieQuery}`,
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${movieQuery}`,
             {
               signal: controller.signal,
             }
@@ -150,11 +150,26 @@ function Logo() {
 }
 //search bar
 function SearchBar({ query, setQuery, placeholder }) {
+  useEffect(
+    function () {
+      function callback(e) {
+        const el = document.querySelector(".search");
+        if (document.activeElement === el) return;
+        if (e.key === "Enter") {
+          el.focus();
+          setQuery("");
+        }
+      }
+      document.addEventListener("keydown", callback);
+      return () => document.addEventListener("keydown", callback);
+    },
+    [setQuery]
+  );
   return (
     <input
       className="search"
       type="text"
-      placeholder={placeholder}
+      placeholder="search movie by name..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
     />
@@ -351,7 +366,7 @@ function Summary({ watched }) {
         </p>
         <p>
           <span>⏳</span>
-          <span>{avgRuntime} min</span>
+          <span>{avgRuntime.toFixed(2)} min</span>
         </p>
       </div>
     </div>
