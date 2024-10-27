@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
 import StarRating from "./StarRating";
 import { useMovies } from "./useMovies";
+import { useLocalStorageState } from "./useLocalStorageState";
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const KEY = "cae4a4a2";
 export default function App() {
   const [movieQuery, setMovieQuery] = useState("");
-  const [watched, setWatched] = useState(function () {
-    const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue);
-  });
+  const [watched, setWatched] = useLocalStorageState([], "watched");
   const [selectedId, setSelectedId] = useState(null);
   const { movies, isLoading, error } = useMovies(movieQuery, handleCloseMovie);
   function onSelectMovie(id) {
@@ -30,13 +28,6 @@ export default function App() {
     );
   }
 
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched]
-  );
-
   return (
     <>
       <NavBar>
@@ -49,7 +40,6 @@ export default function App() {
       </NavBar>
       <Main>
         <Box>
-          {/* <MovieList movies={movies} /> */}
           {isLoading && <Loader />}
           {!isLoading && !error && (
             <MovieList movies={movies} onSelectMovie={onSelectMovie} />
@@ -109,7 +99,7 @@ function Logo() {
   );
 }
 //search bar
-function SearchBar({ query, setQuery, placeholder }) {
+function SearchBar({ query, setQuery }) {
   useEffect(
     function () {
       function callback(e) {
