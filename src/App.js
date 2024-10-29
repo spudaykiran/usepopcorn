@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import StarRating from "./StarRating";
 import { useMovies } from "./useMovies";
-import { useLocalStorageState } from "./useLocalStorageState";
 const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+  arr.reduce((acc, cur, arr) => acc + cur / arr.length, 0);
 
 const KEY = "cae4a4a2";
 export default function App() {
   const [movieQuery, setMovieQuery] = useState("");
-  const [watched, setWatched] = useLocalStorageState([], "watched");
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
   const [selectedId, setSelectedId] = useState(null);
   const { movies, isLoading, error } = useMovies(movieQuery, handleCloseMovie);
   function onSelectMovie(id) {
@@ -27,6 +29,13 @@ export default function App() {
       prevWatched.filter((movie) => movie.imdbID !== id)
     );
   }
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
+  );
 
   return (
     <>
@@ -100,21 +109,6 @@ function Logo() {
 }
 //search bar
 function SearchBar({ query, setQuery }) {
-  useEffect(
-    function () {
-      function callback(e) {
-        const el = document.querySelector(".search");
-        if (document.activeElement === el) return;
-        if (e.key === "Enter") {
-          el.focus();
-          setQuery("");
-        }
-      }
-      document.addEventListener("keydown", callback);
-      return () => document.addEventListener("keydown", callback);
-    },
-    [setQuery]
-  );
   return (
     <input
       className="search"
